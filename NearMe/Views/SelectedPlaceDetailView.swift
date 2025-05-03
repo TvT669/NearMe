@@ -6,13 +6,32 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct SelectedPlaceDetailView: View {
+    
+    @Binding var mapItem: MKMapItem?
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading){
+                if let mapItem {
+                    PlaceView(mapItem: mapItem)
+                }
+            }
+            Image(systemName: "xmark.circle.fill")
+                .padding([.trailing], 10)
+                .onTapGesture {
+                    mapItem = nil
+                }
+        }
     }
 }
 
 #Preview {
-    SelectedPlaceDetailView()
+    let apple = Binding<MKMapItem?>(
+        get: { PreviewData.apple},
+        set: {_ in}
+    )
+    return SelectedPlaceDetailView(mapItem: apple)
 }

@@ -9,6 +9,34 @@ import Foundation
 import MapKit
 import Observation
 
+
+enum LocationError: LocalizedError {
+    case authorizationDenied
+    case authorizationRestricted
+    case unknownLocation
+    case accessDenied
+    case network
+    case operationFailed
+    
+    var errorDescription: String? {
+        switch self {
+        case .authorizationDenied:
+            return NSLocalizedString("Location access denied.", comment:"")
+        case .authorizationRestricted:
+            return NSLocalizedString("Location access retricted", comment: "")
+        case .unknownLocation:
+            return NSLocalizedString("Unknow location", comment: "")
+        case .accessDenied:
+            return NSLocalizedString("Access denied", comment: "")
+        case .network:
+            return NSLocalizedString("Network failed", comment: "")
+        case .operationFailed:
+            return NSLocalizedString("Operation failed", comment: "")
+        
+        }
+    }
+}
+
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
     
@@ -16,6 +44,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     static let shared = LocationManager()
     
     var region: MKCoordinateRegion = MKCoordinateRegion()
+    var error: LocationError? = nil
     
    private override init() {
        super.init()
@@ -31,21 +60,34 @@ extension LocationManager {
         }
     }
     
-    func locacationManagerDidChangeAuthorization(_ manager: CLLocationManager){
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager){
         switch manager.authorizationStatus{
         case .notDetermined:
             manager.requestWhenInUseAuthorization()
         case.authorizedAlways, .authorizedWhenInUse:
             manager.requestLocation()
         case.denied:
-            print("denied")
+            error = .authorizationDenied
         case .restricted:
-            print("restricted")
+            error = .authorizationRestricted
             @unknown default :
             break
         }
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        //在 locationManager(_:didFailWithError:) 方法中将 error 转换为 CLError 的目的是 ​精准识别 Core Location 框架抛出的特定错误类型，这是处理定位错误的关键步骤。
         
+        if let clError = error as? CLError {
+            switch clError.code {
+            case .locationUnknown:
+                self.error = . unknownLocation
+            case .denied:
+                self .error = .accessDenied
+            case .network:
+                self.error = .network
+            default:
+                self.error = .operationFailed
+            }
+        }
     }
 }

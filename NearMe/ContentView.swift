@@ -75,6 +75,11 @@ struct ContentView: View {
                             SelectedPlaceDetailView(mapItem: $selectedMapItem)
                                 .padding()
                             if selectedDetent == .medium || selectedDetent == .large{
+                                if let selectedMapItem {
+                                    ActionButtons(mapItem: selectedMapItem)
+                                        .padding()
+                                }
+                               
                                 LookAroundPreview(initialScene: lookAroundScene)
                             }
                               

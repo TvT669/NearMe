@@ -8,6 +8,19 @@
 import Foundation
 import MapKit
 
+func makeCall(phone: String) {
+    // 1. 构造电话协议 URL（关键：正确的 URL Scheme 是 tel://）
+    if let url = URL(string: "tel://\(phone)") {
+        // 2. 检查设备是否支持拨打电话（如 iPad 可能不支持）
+        if UIApplication.shared.canOpenURL(url) {
+            // 3. 跳转到系统电话应用并自动拨号
+            UIApplication.shared.open(url)
+        } else {
+            print("Device can't make phone calls")
+        }
+    }
+}
+
 func calculationDirections(from: MKMapItem, to: MKMapItem) async -> MKRoute? {
     // 1. 创建路线请求对象
     let directionsRequest = MKDirections.Request()
